@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -12,6 +13,7 @@
 
 #include <optparse.h>
 
+#include <pm/pm.h>
 #include <pm/version.h>
 
 #define PM_DEFAULT_INTERVAL 60000
@@ -22,8 +24,9 @@
 #define OPTION_DESCRIPTION_H "produce help message"
 #define OPTION_DESCRIPTION_V "print version string"
 #define OPTION_DESCRIPTION_O "output file name"
-#define OPTION_DESCRIPTION_P "monitoring process id"
-#define OPTION_DESCRIPTION_N "monitoring process name"
+#define OPTION_DESCRIPTION_I "interval in ms (default 60000)"
+#define OPTION_DESCRIPTION_P "monitoring process id (multiple separated by ,)"
+#define OPTION_DESCRIPTION_N "monitoring process name (multiple separated by ;)"
 #define OPTION_DESCRIPTION_C "configuration file name"
 
 #ifdef _WIN32
@@ -55,18 +58,18 @@ static struct optparse_long longopts[LONG_OPTIONS_COUNT] = {
     {"help", 'h', OPTPARSE_NONE},
     {"version", 'v', OPTPARSE_NONE},
     {"output", 'o', OPTPARSE_REQUIRED},
+    {"interval", 'i', OPTPARSE_REQUIRED},
     {"process-id", 'p', OPTPARSE_REQUIRED},
-    {"process-name", 'n', OPTPARSE_REQUIRED},
-    {"configuration", 'c', OPTPARSE_REQUIRED},
+    {"process-name", 'n', OPTPARSE_REQUIRED}
 };
 
 static struct optparse_description longoptsdesc[LONG_OPTIONS_COUNT] = {
   { OPTION_DESCRIPTION_H, sizeof(OPTION_DESCRIPTION_H) },
   { OPTION_DESCRIPTION_V, sizeof(OPTION_DESCRIPTION_V) },
   { OPTION_DESCRIPTION_O, sizeof(OPTION_DESCRIPTION_O) },
+  { OPTION_DESCRIPTION_I, sizeof(OPTION_DESCRIPTION_I) },
   { OPTION_DESCRIPTION_P, sizeof(OPTION_DESCRIPTION_P) },
-  { OPTION_DESCRIPTION_N, sizeof(OPTION_DESCRIPTION_N) },
-  { OPTION_DESCRIPTION_C, sizeof(OPTION_DESCRIPTION_C) }
+  { OPTION_DESCRIPTION_N, sizeof(OPTION_DESCRIPTION_N) }
 };
 
 static bool _go;
@@ -83,7 +86,7 @@ static BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
-  DWORD wait;
+  DWORD wait, sleep;
   ULONGLONG begining, conclusion, elapsed;
   DWORD interval = PM_DEFAULT_INTERVAL;
 #else
@@ -91,7 +94,7 @@ int main(int argc, char* argv[]) {
 #endif
   struct optparse options;
 
-  int option, longindex, result = EXIT_SUCCESS, pid = -1;
+  int option, longindex, result = EXIT_SUCCESS;
   bool go;
 
   optparse_init(&options, argv);
@@ -119,24 +122,38 @@ int main(int argc, char* argv[]) {
         goto pm_cli_exit_failure;
       }
 
-    case 'p':
+    case 'i':
       if (options.optarg) {
-        pid = atoi(options.optarg);
-      }
-      if (pid > 0) {
-        if ((result = pm_init_id(pid)) != EXIT_SUCCESS) {
-          goto pm_cli_exit_cleanup;
+        interval = atoi(options.optarg);
+        if (interval > 0) {
+          printf("Interval is set to %d\n", interval);
+        } else {
+          fprintf(stderr, "Interval must be a number. "
+            "Use --help for usage.\n");
+          goto pm_cli_exit_failure;
         }
-        printf("Process ID is %d\n", pid);
-        break;
       } else {
-        fprintf(stderr, "Invalid Process ID\n");
+        fprintf(stderr, "Interval not specified. "
+          "Use --help for usage.\n");
         goto pm_cli_exit_failure;
       }
+      break;
+
+    case 'p':
+      if (options.optarg) {
+        if ((result = pm_add_ids(options.optarg)) != EXIT_SUCCESS) {
+          goto pm_cli_exit_cleanup;
+        }
+      } else {
+        fprintf(stderr, "Process IDs not specified. "
+          "Use --help for usage.\n");
+        goto pm_cli_exit_failure;
+      }
+      break;
 
     case 'n':
       if (options.optarg) {
-        if ((result = pm_init_name(options.optarg)) != EXIT_SUCCESS) {
+        if ((result = pm_add_names(options.optarg)) != EXIT_SUCCESS) {
           goto pm_cli_exit_cleanup;
         }
         break;
@@ -144,22 +161,12 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Process Name not specified. "
           "Use --help for usage.\n");
         goto pm_cli_exit_failure;
-      }
 
-    case 'c':
-      if (options.optarg) {
-        if ((result = pm_init_configuration(options.optarg)) != EXIT_SUCCESS) {
-          goto pm_cli_exit_cleanup;
-        }
-      } else {
-        fprintf(stderr, "Configuration file name not specified. "
-          "Use --help for usage.\n");
-        goto pm_cli_exit_failure;
       }
     }
   }
 
-  if ((result = pm_is_initialized()) != EXIT_SUCCESS) {
+  if ((result = pm_init()) != EXIT_SUCCESS) {
     goto pm_cli_exit_cleanup;
   }
 
@@ -193,6 +200,7 @@ int main(int argc, char* argv[]) {
 
   printf("Press Ctrl-C or Ctrl-Break to stop!\n");
 
+  pm_start();
   while (go) {
 #ifdef _WIN32
     begining = GetTickCount64();
@@ -209,7 +217,9 @@ int main(int argc, char* argv[]) {
     conclusion = GetTickCount64();
     elapsed = conclusion - begining;
     if (elapsed < interval) {
-      wait = WaitForSingleObject(ghSleeper, interval - elapsed);
+      sleep = interval - (DWORD)(elapsed);
+      assert(sleep <= interval);
+      wait = WaitForSingleObject(ghSleeper, sleep);
       switch (wait) {
       case WAIT_OBJECT_0:
       case WAIT_TIMEOUT:
@@ -326,33 +336,34 @@ void show_help_item(const int index) {
   printf("  %s\n", text_buffer);
 }
 
-void show_help(char* name) {
+void show_help(char* n) {
   int i;
 #ifdef _WIN32
   char* lastslash;
-  lastslash = strrchr(name, '\\');
+  lastslash = strrchr(n, '\\');
   if (lastslash != NULL) {
     ++lastslash;
-    name = lastslash;
+    n = lastslash;
   }
 #endif
-  printf("%s usage:\n\n", name);
+  printf("%s usage:\n\n", n);
   for (i = 0; i < LONG_OPTIONS_COUNT; ++i) {
     show_help_item(i);
   }
   printf("\nExamples:\n\n");
-#ifdef PM_SHOW_SHORT_EXAMPLES
-  printf("  %s -p 1234\n", name);
+  printf("  %s --process-id 1234,5678\n", n);
+#ifdef _WIN32
+  printf("  %s --process-name a.exe;b.exe;%s\n", n, n);
+  printf("  %s  --process-id 1234,5678 --process-name a.exe;b.exe;%s\n", n, n);
+#else
+  printf("  %s --process-name a;b;%s\n", n, n);
+  printf("  %s  --process-id 1234,5678 --process-name a;b;%s\n", n, n);
 #endif
-  printf("  %s --process-id 1234\n", name);
+
 #ifdef PM_SHOW_SHORT_EXAMPLES
-  printf("  %s -n %s\n", name, name);
+  printf("  %s -p 1234\n", n);
+  printf("  %s -n %s\n", n, n);
 #endif
-  printf("  %s --process-name %s\n", name, name);
-#ifdef PM_SHOW_SHORT_EXAMPLES
-  printf("  %s -c pm.yaml\n", name);
-#endif
-  printf("  %s --configuration pm.yaml\n", name);
 }
 
 void show_version() {

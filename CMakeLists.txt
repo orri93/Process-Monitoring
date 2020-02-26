@@ -8,7 +8,7 @@ project ("Process Monitoring"
   DESCRIPTION "Simple Process Monitoring Tool"
   LANGUAGES C)
 
-option(BUILD_TESTS "Build tests" ON)
+#option(BUILD_TESTS "Build tests" ON)
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(CLANG_TIDY_FIX_ERRORS
   "Perform fixes with Clang-Tidy even if compilation errors were found" OFF)
@@ -73,34 +73,34 @@ if(CLANG_TIDY)
 endif()
 
 # Include sub-projects.
-add_subdirectory(extern)
+#add_subdirectory(extern)
 
-list(APPEND pm_containers_include
-  "${CMAKE_CURRENT_SOURCE_DIR}/extern/containers"
-  "${CMAKE_CURRENT_SOURCE_DIR}/extern/containers/src/include")
+#list(APPEND pm_containers_include
+#  "${CMAKE_CURRENT_SOURCE_DIR}/extern/containers"
+#  "${CMAKE_CURRENT_SOURCE_DIR}/extern/containers/src/include")
 list(APPEND pm_optparse_include
   "${CMAKE_CURRENT_SOURCE_DIR}/extern/optparse")
-list(APPEND pm_libyaml_include
-  "${CMAKE_CURRENT_SOURCE_DIR}/extern/libyaml/include")
+#list(APPEND pm_libyaml_include
+#  "${CMAKE_CURRENT_SOURCE_DIR}/extern/libyaml/include")
 
 add_subdirectory(src)
 
-if (NOV_BUILD_TESTS)
-  enable_testing()
-  if (MSVC)
+#if (NOV_BUILD_TESTS)
+#  enable_testing()
+#  if (MSVC)
     #if (NOV_FORCE_SHARED_CRT)
-      set(gtest_force_shared_crt ON CACHE BOOL "Use Shared CRT")
+#      set(gtest_force_shared_crt ON CACHE BOOL "Use Shared CRT")
     #endif ()
-  endif (MSVC)
-  list(APPEND pm_test_include
-    "${CMAKE_CURRENT_SOURCE_DIR}/extern/googletest/googletest/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/extern/googletest/googlemock/include")
-  list(APPEND pm_test_libraries
-    gtest
-    gmock
-    gmock_main)
-  add_subdirectory(tests)
-endif ()
+#  endif (MSVC)
+#  list(APPEND pm_test_include
+#    "${CMAKE_CURRENT_SOURCE_DIR}/extern/googletest/googletest/include"
+#    "${CMAKE_CURRENT_SOURCE_DIR}/extern/googletest/googlemock/include")
+#  list(APPEND pm_test_libraries
+#    gtest
+#    gmock
+#    gmock_main)
+#  add_subdirectory(tests)
+#endif ()
 
 message(STATUS "")
 message(STATUS "NOV Wellbore Connect Modules ${PROJECT_VERSION} BUILD SUMMARY")
@@ -115,9 +115,9 @@ endif (MSVC_VERSION)
 message(STATUS "  C Compiler ID             : ${CMAKE_C_COMPILER_ID}")
 message(STATUS "  C Compiler Version        : ${CMAKE_C_COMPILER_VERSION}")
 message(STATUS "  C Compiler flags          : ${CMAKE_C_FLAGS}")
-if (BUILD_TESTS)
-message(STATUS "Building Tests")
-if (MSVC)
-message(STATUS "  GTest Force Shared CRT    : ${gtest_force_shared_crt}")
-endif ()
-endif ()
+#if (BUILD_TESTS)
+#message(STATUS "Building Tests")
+#if (MSVC)
+#message(STATUS "  GTest Force Shared CRT    : ${gtest_force_shared_crt}")
+#endif ()
+#endif ()

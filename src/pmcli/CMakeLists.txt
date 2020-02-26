@@ -48,14 +48,14 @@ if(GENERATE_PDB_FOR_RELEASE AND CMAKE_BUILD_TYPE MATCHES "Release")
     DESTINATION pdb)
 endif()
 
-add_custom_command(TARGET ${pmcli_target} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${pm_etc_path}/pm.yaml"
-    "$<TARGET_FILE_DIR:${pmcli_target}>/pm.yaml")
+#add_custom_command(TARGET ${pmcli_target} POST_BUILD
+#  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#    "${pm_etc_path}/pm.yaml"
+#    "$<TARGET_FILE_DIR:${pmcli_target}>/pm.yaml")
 
 install(TARGETS ${pmcli_target}
   LIBRARY DESTINATION bin
   ARCHIVE DESTINATION bin)
-install(FILES "$<TARGET_FILE_DIR:${pmcli_target}>/pm.yaml"
-  DESTINATION bin
-  COMPONENT config)
+#install(FILES "$<TARGET_FILE_DIR:${pmcli_target}>/pm.yaml"
+#  DESTINATION bin
+#  COMPONENT config)
