@@ -1,4 +1,8 @@
 # Include sub-projects.
+
+#add_subdirectory (containers)
 add_subdirectory (libyaml)
 
-add_subdirectory (googletest)
+if (NOV_BUILD_TESTS)
+  add_subdirectory (googletest)
+endif ()
