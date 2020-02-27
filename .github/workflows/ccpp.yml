@@ -10,14 +10,12 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: CMake configure
+      run: |
+        cmake .
+    - name: build
+      run: |
+        cmake --build .
 
   build-windows:
     name: Windows build
@@ -26,7 +24,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Cmake configure
+    - name: CMake configure
       run: |
         cmake -G "Visual Studio 16 2019" .
     - name: Build (MSVC)
