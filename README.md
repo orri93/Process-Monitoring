@@ -5,7 +5,7 @@ Simple Process Monitoring Tool
 
 ### pmcli usage
 | Option   | Long           | Description                                       |
-| -------- | -------------- | ------------------------------------------------- |
+|:-------- |:-------------- |:------------------------------------------------- |
 | -h or -? | --help         | produce help message                              |
 | -v       | --version      | print version string                              |
 | -o       | --output       | output file name                                  |
@@ -17,7 +17,7 @@ Simple Process Monitoring Tool
 
 ### Types
 | Abbreviation   | Type                            | Description  |
-| -------------- | ------------------------------- | ------------ |
+|:-------------- |:------------------------------- |:------------ |
 | pfc            | Page fault count                |              |
 | pwss           | Peak working set size           |              |
 | wss            | Working set size                | default type |
