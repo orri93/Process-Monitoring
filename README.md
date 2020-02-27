@@ -1,4 +1,4 @@
- # Process-Monitoring
+# Process-Monitoring
 Simple Process Monitoring Tool
 
 # Usage
@@ -30,10 +30,12 @@ Simple Process Monitoring Tool
 
 ### Examples
 pmcli --process-id 1234,5678
+
 pmcli --process-name a.exe;b.exe;pmcli.exe
+
 pmcli --interval 120000 --process-id 1234,5678 --process-name a;b;pmcli
 
-# Build
+# Build Process Monitoring
 
 ## Dependencies
 [CMake](https://www.cmake.org)
@@ -41,23 +43,41 @@ pmcli --interval 120000 --process-id 1234,5678 --process-name a;b;pmcli
 ## Process
 
 ### Create a build folder
+
 ```cmake -E make_directory <new-build-path>```
+
 Example
+
 ```cmake -E make_directory "C:\build\pm"```
+
 ### Create a build
+
 ```cmake -E chdir <path-to-build> cmake -G <generator-name> <path-to-source>```
+
 Example
+
 ```cmake -E chdir "C:\build\pm" cmake -G "Visual Studio 16 2019" "C:\src\pm"```
+
 To install into specified folder
+
 ```cmake -E chdir "C:\build\pm" cmake -DCMAKE_INSTALL_PREFIX:PATH="C:\install\pm" -G "Visual Studio 16 2019" "C:\src\pm"```
+
 ### Build
+
 ```cmake --build <path-to-build> --target <target> --config <configuration>```
+
 Example
+
 ```cmake --build C:\build\pm --target ALL_BUILD --config RelWithDebInfo```
+
 ### Install
+
 ```cmake --build <path-to-build> --target INSTALL --config <configuration>```
+
 Example
+
 ```cmake --build C:\build\pm --target INSTALL --config RelWithDebInfo```
+
 # Release dependencies
 Visual C Redistributable 2019
 
