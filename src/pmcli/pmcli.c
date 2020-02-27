@@ -17,7 +17,7 @@
 #include <pm/version.h>
 
 #define PM_DEFAULT_INTERVAL 60000
-#define LONG_OPTIONS_COUNT 6
+#define LONG_OPTIONS_COUNT 7
 #define LONG_OPTIONS_HELP_SPACE 38
 #define TEXT_BUFFER_SIZE 256
 
@@ -27,6 +27,7 @@
 #define OPTION_DESCRIPTION_I "interval in ms (default 60000)"
 #define OPTION_DESCRIPTION_P "monitoring process id (multiple separated by ,)"
 #define OPTION_DESCRIPTION_N "monitoring process name (multiple separated by ;)"
+#define OPTION_DESCRIPTION_T "memory type (see list below)"
 #define OPTION_DESCRIPTION_C "configuration file name"
 
 #ifdef _WIN32
@@ -60,7 +61,8 @@ static struct optparse_long longopts[LONG_OPTIONS_COUNT] = {
     {"output", 'o', OPTPARSE_REQUIRED},
     {"interval", 'i', OPTPARSE_REQUIRED},
     {"process-id", 'p', OPTPARSE_REQUIRED},
-    {"process-name", 'n', OPTPARSE_REQUIRED}
+    {"process-name", 'n', OPTPARSE_REQUIRED},
+    {"type", 't', OPTPARSE_REQUIRED}
 };
 
 static struct optparse_description longoptsdesc[LONG_OPTIONS_COUNT] = {
@@ -69,12 +71,14 @@ static struct optparse_description longoptsdesc[LONG_OPTIONS_COUNT] = {
   { OPTION_DESCRIPTION_O, sizeof(OPTION_DESCRIPTION_O) },
   { OPTION_DESCRIPTION_I, sizeof(OPTION_DESCRIPTION_I) },
   { OPTION_DESCRIPTION_P, sizeof(OPTION_DESCRIPTION_P) },
-  { OPTION_DESCRIPTION_N, sizeof(OPTION_DESCRIPTION_N) }
+  { OPTION_DESCRIPTION_N, sizeof(OPTION_DESCRIPTION_N) },
+  { OPTION_DESCRIPTION_T, sizeof(OPTION_DESCRIPTION_T) }
 };
 
 static bool _go;
 
 static void stop_go();
+static void show_types();
 static void show_help_item(const int index);
 static void show_help(char* name);
 static void show_version();
@@ -156,13 +160,24 @@ int main(int argc, char* argv[]) {
         if ((result = pm_add_names(options.optarg)) != EXIT_SUCCESS) {
           goto pm_cli_exit_cleanup;
         }
-        break;
       } else {
         fprintf(stderr, "Process Name not specified. "
           "Use --help for usage.\n");
         goto pm_cli_exit_failure;
-
       }
+      break;
+
+    case 't':
+      if (options.optarg) {
+        if ((result = pm_set_types(options.optarg)) != EXIT_SUCCESS) {
+          goto pm_cli_exit_cleanup;
+        }
+      } else {
+        fprintf(stderr, "Type not specified. "
+          "Use --help for usage.\n");
+        goto pm_cli_exit_failure;
+      }
+      break;
     }
   }
 
@@ -314,6 +329,18 @@ void stop_go() {
 #endif
 }
 
+void show_types() {
+  int i, length;
+  printf("\nTypes\n\n");
+  for (i = 0; i < PM_TYPE_COUNT; ++i) {
+    if (i != PM_TYPE_DEFAULT_INDEX) {
+      printf("  %s: %s\n", pm_type_arr[i].st, pm_type_arr[i].lt);
+    } else {
+      printf("  %s: %s (default type)\n", pm_type_arr[i].st, pm_type_arr[i].lt);
+    }
+  }
+}
+
 void show_help_item(const int index) {
   const char* description;
   char* text;
@@ -350,6 +377,7 @@ void show_help(char* n) {
   for (i = 0; i < LONG_OPTIONS_COUNT; ++i) {
     show_help_item(i);
   }
+  show_types();
   printf("\nExamples:\n\n");
   printf("  %s --process-id 1234,5678\n", n);
 #ifdef _WIN32

@@ -28,6 +28,7 @@
   "Process Monitoring output file name has already been set\n"
 
 #define PM_TEXT_BUFFER_SIZE 256
+#define PM_DEFAULT_TYPE PM_TYPE_WORKING_SET_SIZE
 
 #ifdef _WIN32
 #define PM_PROCESS_ARRAY_SIZE 1024
@@ -35,8 +36,49 @@
 #else
 #endif
 
+struct pm_type pm_type_arr[PM_TYPE_COUNT] = {
+  {
+    "Page fault count",
+    "pfc",
+    PM_TYPE_PAGE_FAULT_COUNT },
+  {
+    "Peak working set size",
+    "pwss",
+    PM_TYPE_PEAK_WORKING_SET_SIZE },
+  {
+    "Working set size",
+    "wss",
+    PM_TYPE_WORKING_SET_SIZE },
+  {
+    "Quota peak paged pool usage",
+    "qpppu",
+    PM_TYPE_QUOTA_PEAK_PAGED_POOL_USAGE },
+  {
+    "Quota paged pool usage",
+    "qppu",
+    PM_TYPE_QUOTA_PAGED_POOL_USAGE },
+  {
+    "Quota peak non paged pool usage",
+    "qpnppu",
+    PM_TYPE_QUOTA_PEAK_NON_PAGED_POOL_USAGE },
+  {
+    "Quota non paged pool usage",
+    "qnppu",
+    PM_TYPE_QUOTA_NON_PAGED_POOL_USAGE },
+  {
+    "Page file usage",
+    "pfu",
+    PM_TYPE_PAGEFILE_USAGE },
+  {
+    "Peak page file usage",
+    "ppfu",
+    PM_TYPE_PEAK_PAGEFILE_USAGE },
+};
+
 static char* outputfilename = NULL;
 static FILE* outputfile = NULL;
+
+static type = PM_TYPE_UNDEFINED;
 
 static int* monitoringid = NULL;
 static char** monitoringname = NULL;
@@ -68,6 +110,8 @@ static char processname[PM_PROCESS_NAME_SIZE];
 static time_t currtime;
 
 static char pm_text_buffer[PM_TEXT_BUFFER_SIZE];
+
+static unsigned long long pm_get_value(void* p, int id, int type);
 
 static int pm_is_monitored_id(const int id);
 static int pm_is_monitored_name(const char* name);
@@ -150,9 +194,26 @@ int pm_add_names(char* names) {
   return EXIT_SUCCESS;
 }
 
+int pm_set_types(char* types) {
+  length = strlen(types);
+  if (length > 0) {
+    for (i = 0; i < PM_TYPE_COUNT; ++i) {
+      if (strncmp(pm_type_arr[i].st, types, 0x10) == 0) {
+        type = pm_type_arr[i].type;
+        printf("Setting memory type to %s\n", pm_type_arr[i].lt);
+        return EXIT_SUCCESS;
+      }
+    }
+    fprintf(stderr, "Unknown memory type '%s'\n", types);
+  } else {
+    fprintf(stderr, "Error: Type is empty!\n");
+  }
+  return EXIT_FAILURE;
+}
+
 int pm_set_output(char* filename) {
   if (!outputfilename) {
-    length = (size_t)(strlen(filename)) + 1;
+    length = strlen(filename) + 1;
     outputfilename = malloc(length);
     if (outputfilename) {
       strncpy(outputfilename, filename, length);
@@ -212,6 +273,13 @@ int pm_init() {
 
     if ((result = pm_write_header()) != EXIT_SUCCESS) {
       return result;
+    }
+
+    if (type == PM_TYPE_UNDEFINED || type == PM_TYPE_UNKNOWN) {
+      type = PM_DEFAULT_TYPE;
+      printf(
+        "Setting memory type to default %s\n",
+        pm_type_arr[PM_TYPE_DEFAULT_INDEX].lt);
     }
 
     return EXIT_SUCCESS;
@@ -282,9 +350,10 @@ int pm_loop() {
           pids[i]);
         if (hprocess) {
           if ((monitoring_index = pm_is_monitored_id(pids[i])) >= 0) {
-            if (GetProcessMemoryInfo(hprocess, &pmc, sizeof(pmc))) {
-              monitoring[monitoring_index] = pmc.WorkingSetSize;
-            }
+            monitoring[monitoring_index] = pm_get_value(
+              &hprocess,
+              pids[i],
+              type);
           } else {
             if (EnumProcessModules(
               hprocess,
@@ -297,9 +366,10 @@ int pm_loop() {
                 processname,
                 sizeof(processname) / sizeof(CHAR)) > 0) {
                 if ((monitoring_index = pm_is_monitored_name(processname)) >= 0) {
-                  if (GetProcessMemoryInfo(hprocess, &pmc, sizeof(pmc))) {
-                    monitoring[monitoring_index] = pmc.WorkingSetSize;
-                  }
+                  monitoring[monitoring_index] = pm_get_value(
+                    &hprocess,
+                    pids[i],
+                    type);
                 }
               }
             }
@@ -370,6 +440,43 @@ void pm_shutdown() {
     free(outputfilename);
     outputfilename = NULL;
   }
+}
+
+unsigned long long pm_get_value(void* p, int id, int type) {
+#ifdef _WIN32
+  HANDLE* hp;
+  hp = (HANDLE*)(p);
+  if (GetProcessMemoryInfo(*hp, &pmc, sizeof(pmc))) {
+    switch (type) {
+      case PM_TYPE_PAGE_FAULT_COUNT:
+        return pmc.PageFaultCount;
+      case PM_TYPE_PEAK_WORKING_SET_SIZE:
+        return pmc.PeakWorkingSetSize;
+      case PM_TYPE_WORKING_SET_SIZE:
+        return pmc.WorkingSetSize;
+      case PM_TYPE_QUOTA_PEAK_PAGED_POOL_USAGE:
+        return pmc.QuotaPeakPagedPoolUsage;
+      case PM_TYPE_QUOTA_PAGED_POOL_USAGE:
+        return pmc.QuotaPagedPoolUsage;
+      case PM_TYPE_QUOTA_PEAK_NON_PAGED_POOL_USAGE:
+        return pmc.QuotaPeakNonPagedPoolUsage;
+      case PM_TYPE_QUOTA_NON_PAGED_POOL_USAGE:
+        return pmc.QuotaNonPagedPoolUsage;
+      case PM_TYPE_PAGEFILE_USAGE:
+        return pmc.PagefileUsage;
+      case PM_TYPE_PEAK_PAGEFILE_USAGE:
+        return pmc.PeakPagefileUsage;
+      default:
+        fprintf(stderr, "Unknown memory type %d\n", type);
+        return 0;
+    }
+  } else {
+    fprintf(stderr, "Failed to get memory information for process ID %d\n", id);
+    return 0;
+  }
+#else
+  return 0;
+#endif
 }
 
 int pm_is_monitored_id(const int id) {
