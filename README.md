@@ -10,7 +10,6 @@ Simple Process Monitoring Tool
 | -v       | --version      | print version string                              |
 | -o       | --output       | output file name                                  |
 | -i       | --interval     | interval in ms (default 60000)                    |
-| -i       | --interval     | interval in ms (default 60000)                    |
 | -p       |  --process-id  | monitoring process id (multiple separated by ,)   |
 | -n       | --process-name | monitoring process name (multiple separated by ;) |
 | -t       | --type         | memory type (see list below)                      |
