@@ -330,7 +330,7 @@ void stop_go() {
 }
 
 void show_types() {
-  int i, length;
+  int i;
   printf("\nTypes\n\n");
   for (i = 0; i < PM_TYPE_COUNT; ++i) {
     if (i != PM_TYPE_DEFAULT_INDEX) {

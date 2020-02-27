@@ -1,0 +1,28 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+      - master
+      - release/*
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+
+  build-windows:
+    name: Windows build
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Git Submodules
+      run: git submodule update --init --recursive --depth 50
+    - name: CMake configure
+      run: |
+        cmake -G "Visual Studio 16 2019" .
+    - name: Build (MSVC)
+      run: |
+        cmake --build .

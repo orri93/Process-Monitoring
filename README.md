@@ -1,34 +1,81 @@
-# Process-Monitoring
+# Process Monitoring
 Simple Process Monitoring Tool
 
 # Usage
 
-<dl>
-  <dt>pmcli usage</dt>
-  <dd>-h [ --help ]                produce help message</dd>
-  <dd>-v [ --version ]             print version string</dd>
-  <dd>-o [ --output ]              output file name</dd>
-  <dd>-i [ --interval ]            interval in ms (default 60000)</dd>
-  <dd>-p [ --process-id ]          monitoring process id (multiple separated by ,)</dd>
-  <dd>-n [ --process-name ]        monitoring process name (multiple separated by ;)</dd>
-  <dd>-t [ --type ]                memory type (see list below)</dd>
+### pmcli usage
+| Option   | Long           | Description                                       |
+|:-------- |:-------------- |:------------------------------------------------- |
+| -h or -? | --help         | produce help message                              |
+| -v       | --version      | print version string                              |
+| -o       | --output       | output file name                                  |
+| -i       | --interval     | interval in ms (default 60000)                    |
+| -p       |  --process-id  | monitoring process id (multiple separated by ,)   |
+| -n       | --process-name | monitoring process name (multiple separated by ;) |
+| -t       | --type         | memory type (see list below)                      |
 
-  <dt>Types</dt>
-  <dd>pfc: Page fault count</dd>
-  <dd>pwss: Peak working set size</dd>
-  <dd>wss: Working set size (default type)</dd>
-  <dd>qpppu: Quota peak paged pool usage</dd>
-  <dd>qppu: Quota paged pool usage</dd>
-  <dd>qpnppu: Quota peak non paged pool usage</dd>
-  <dd>qnppu: Quota non paged pool usage</dd>
-  <dd>pfu: Page file usage</dd>
-  <dd>ppfu: Peak page file usage</dd>
+### Types
+| Abbreviation   | Type                            | Description  |
+|:-------------- |:------------------------------- |:------------ |
+| pfc            | Page fault count                |              |
+| pwss           | Peak working set size           |              |
+| wss            | Working set size                | default type |
+| qpppu          | Quota peak paged pool usage     |              |
+| qppu           | Quota paged pool usage          |              |
+| qpnppu         | Quota peak non paged pool usage |              |
+| qnppu          | Quota non paged pool usage      |              |
+| pfu            | Page file usage                 |              |
+| ppfu           | Peak page file usage            |              |
 
-  <dt>Examples:</dt>
-  <dd>pmcli --process-id 1234,5678</dd>
-  <dd>pmcli --process-name a.exe;b.exe;pmcli</dd>
-  <dd>pmcli  --process-id 1234,5678 --process-name a.exe;b.exe;pmcli</dd>
-</dl>
+### Examples
+pmcli --process-id 1234,5678
+
+pmcli --process-name a.exe;b.exe;pmcli.exe
+
+pmcli --interval 120000 --process-id 1234,5678 --process-name a;b;pmcli
+
+# Build Process Monitoring
+
+## Dependencies
+[CMake](https://www.cmake.org)
+
+## Process
+
+### Create a build folder
+
+```cmake -E make_directory <new-build-path>```
+
+Example
+
+```cmake -E make_directory "C:\build\pm"```
+
+### Create a build
+
+```cmake -E chdir <path-to-build> cmake -G <generator-name> <path-to-source>```
+
+Example
+
+```cmake -E chdir "C:\build\pm" cmake -G "Visual Studio 16 2019" "C:\src\pm"```
+
+To install into specified folder
+
+```cmake -E chdir "C:\build\pm" cmake -DCMAKE_INSTALL_PREFIX:PATH="C:\install\pm" -G "Visual Studio 16 2019" "C:\src\pm"```
+
+### Build
+
+```cmake --build <path-to-build> --target <target> --config <configuration>```
+
+Example
+
+```cmake --build C:\build\pm --target ALL_BUILD --config RelWithDebInfo```
+
+### Install
+
+```cmake --build <path-to-build> --target INSTALL --config <configuration>```
+
+Example
+
+```cmake --build C:\build\pm --target INSTALL --config RelWithDebInfo```
 
 # Release dependencies
 Visual C Redistributable 2019
