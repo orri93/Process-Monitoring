@@ -28,5 +28,7 @@ Simple Process Monitoring Tool
   <dd>pmcli --process-id 1234,5678</dd>
   <dd>pmcli --process-name a.exe;b.exe;pmcli</dd>
   <dd>pmcli  --process-id 1234,5678 --process-name a.exe;b.exe;pmcli</dd>
-</dl>:
+</dl>
 
+# Release dependencies
+Visual C Redistributable 2019
