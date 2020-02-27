@@ -83,9 +83,3 @@ Visual C Redistributable 2019
 
 # To do
 Nix support
-
-# Release dependencies
-Visual C Redistributable 2019
-
-# To do
-Nix support
