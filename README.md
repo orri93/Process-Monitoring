@@ -32,3 +32,6 @@ Simple Process Monitoring Tool
 
 # Release dependencies
 Visual C Redistributable 2019
+
+# To do
+Nix support
