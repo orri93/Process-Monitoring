@@ -1,4 +1,4 @@
-# Process-Monitoring
+# Process Monitoring
 Simple Process Monitoring Tool
 
 # Usage
