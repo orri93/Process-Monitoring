@@ -11,6 +11,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Git Submodules
+      run: git submodule update --init --recursive --depth 50
     - name: CMake configure
       run: |
         cmake -G "Visual Studio 16 2019" .
