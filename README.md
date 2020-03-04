@@ -78,7 +78,7 @@ Example
 ```cmake --build C:\build\pm --target INSTALL --config RelWithDebInfo```
 
 # Release dependencies
-Visual C Redistributable 2019
+[Visual C Redistributable 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) - [vc_redist.x64.exe](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 
 # To do
 Nix support
