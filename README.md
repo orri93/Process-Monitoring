@@ -10,7 +10,6 @@ Simple Process Monitoring Tool
 | -v       | --version      | print version string                              |
 | -o       | --output       | output file name                                  |
 | -i       | --interval     | interval in ms (default 60000)                    |
-| -i       | --interval     | interval in ms (default 60000)                    |
 | -p       |  --process-id  | monitoring process id (multiple separated by ,)   |
 | -n       | --process-name | monitoring process name (multiple separated by ;) |
 | -t       | --type         | memory type (see list below)                      |
@@ -79,7 +78,7 @@ Example
 ```cmake --build C:\build\pm --target INSTALL --config RelWithDebInfo```
 
 # Release dependencies
-Visual C Redistributable 2019
+[The Windows Release](https://github.com/orri93/Process-Monitoring/releases) depends on VCRUNTIME140.DLL Version 14.24.28127.4 from [Visual C Redistributable 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) - [vc_redist.x64.exe](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 
 # To do
 Nix support
