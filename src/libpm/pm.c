@@ -78,7 +78,7 @@ struct pm_type pm_type_arr[PM_TYPE_COUNT] = {
 static char* outputfilename = NULL;
 static FILE* outputfile = NULL;
 
-static type = PM_TYPE_UNDEFINED;
+static int type = PM_TYPE_UNDEFINED;
 
 static int* monitoringid = NULL;
 static char** monitoringname = NULL;

@@ -54,6 +54,7 @@ endif()
 #    "$<TARGET_FILE_DIR:${pmcli_target}>/pm.yaml")
 
 install(TARGETS ${pmcli_target}
+  RUNTIME DESTINATION bin
   LIBRARY DESTINATION bin
   ARCHIVE DESTINATION bin)
 #install(FILES "$<TARGET_FILE_DIR:${pmcli_target}>/pm.yaml"
