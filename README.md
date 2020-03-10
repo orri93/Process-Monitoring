@@ -43,42 +43,46 @@ pmcli --interval 120000 --process-id 1234,5678 --process-name a;b;pmcli
 
 ### Create a build folder
 
-```cmake -E make_directory <new-build-path>```
+`cmake -E make_directory <new-build-path>`
 
 Example
 
-```cmake -E make_directory "C:\build\pm"```
+`cmake -E make_directory "C:\build\pm"`
 
 ### Create a build
 
-```cmake -E chdir <path-to-build> cmake -G <generator-name> <path-to-source>```
+`cmake -E chdir <path-to-build> cmake -G <generator-name> <path-to-source>`
 
 Example
 
-```cmake -E chdir "C:\build\pm" cmake -G "Visual Studio 16 2019" "C:\src\pm"```
+`cmake -E chdir "C:\build\pm" cmake -G "Visual Studio 16 2019" "C:\src\pm"`
 
 To install into specified folder
 
-```cmake -E chdir "C:\build\pm" cmake -DCMAKE_INSTALL_PREFIX:PATH="C:\install\pm" -G "Visual Studio 16 2019" "C:\src\pm"```
+`cmake -E chdir "C:\build\pm" cmake -DCMAKE_INSTALL_PREFIX:PATH="C:\install\pm" -G "Visual Studio 16 2019" "C:\src\pm"`
 
 ### Build
 
-```cmake --build <path-to-build> --target <target> --config <configuration>```
+`cmake --build <path-to-build> --target <target> --config <configuration>`
 
 Example
 
-```cmake --build C:\build\pm --target ALL_BUILD --config RelWithDebInfo```
+`cmake --build C:\build\pm --target ALL_BUILD --config RelWithDebInfo`
 
 ### Install
 
-```cmake --build <path-to-build> --target INSTALL --config <configuration>```
+`cmake --build <path-to-build> --target INSTALL --config <configuration>`
 
 Example
 
-```cmake --build C:\build\pm --target INSTALL --config RelWithDebInfo```
+`cmake --build C:\build\pm --target INSTALL --config RelWithDebInfo`
 
 # Release dependencies
 [The Windows Release](https://github.com/orri93/Process-Monitoring/releases) depends on VCRUNTIME140.DLL Version 14.24.28127.4 from [Visual C Redistributable 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) - [vc_redist.x64.exe](https://aka.ms/vs/16/release/vc_redist.x64.exe)
+
+# Known bugs
+
+[Output file argument doesn't work](https://github.com/orri93/Process-Monitoring/issues/2)
 
 # To do
 Nix support
